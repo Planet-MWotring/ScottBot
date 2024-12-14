@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScottBot - Audio Transcription</title>
+    <style>
+        body {
+            background-color: #333; /* Dark grey background */
+            color: #fff; /* White text color for better contrast */
+            font-family: Arial, sans-serif;
+        }
+        #drop-area {
+            border: 2px dashed #ccc;
+            border-radius: 20px;
+            width: 300px;
+            height: 200px;
+            padding: 20px;
+            text-align: center;
+            margin: 20px auto;
+            background-color: #444; /* Slightly lighter grey for contrast */
+        }
+        #drop-area.highlight {
+            border-color: purple;
+        }
+        #fileElem {
+            display: none;
+        }
+        #header {
+            text-align: center;
+            margin: 20px;
+        }
+        #header img {
+            width: 100px;
+            height: auto;
+        }
+        #transcribeBtn {
+            display: block;
+            margin: 20px auto;
+            background-color: #555; /* Button background color */
+            color: #fff; /* Button text color */
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        #transcribeBtn:hover {
+            background-color: #666; /* Button hover color */
+        }
+    </style>
+</head>
+<body>
+    <div id="header">
+        <h1>ScottBot</h1>
+        <img src="{{ url_for('static', filename='images/robot-in-hawaiian-shirt.png') }}" alt="ScottBot Logo">
+    </div>
+    <div id="drop-area">
+        <form class="my-form">
+            <p>Drag and drop an .mp3 file here or click to select a file</p>
+            <input type="file" id="fileElem" accept=".mp3" onchange="handleFiles(this.files)">
+            <label class="button" for="fileElem">Select file</label>
+        </form>
+        <button id="transcribeBtn" onclick="transcribeFile()">Transcribe</button>
+    </div>
+    <a id="downloadLink" style="display:none;" href="#" download="transcription.docx">Download Transcription</a>
+
+    <script>
+        let file;
+
+        function handleFiles(files) {
+            file = files[0];
+            uploadFile(file);
+        }
+
+        function uploadFile(file) {
+            let formData = new FormData();
+            formData.append('file', file);
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            }).then(response => response.text())
+              .then(data => {
+                  alert(data);
+                  document.getElementById('transcribeBtn').disabled = false;
+              }).catch(error => {
+                  console.error('Error:', error);
+              });
+        }
+
+        function transcribeFile() {
+            if (!file) {
+                alert("Please select a file first");
+                return;
+            }
+
+            fetch('/transcribe', {
+                method: 'POST',
+                body: JSON.stringify({ filename: file.name }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(response => response.json())
+              .then(data => {
+                  if (data.success) {
+                      document.getElementById('downloadLink').href = `/download/${data.filename}`;
+                      document.getElementById('downloadLink').style.display = 'block';
+                  } else {
+                      alert('Transcription failed');
+                  }
+              }).catch(error => {
+                  console.error('Error:', error);
+              });
+        }
+    </script>
+</body>
+</html>

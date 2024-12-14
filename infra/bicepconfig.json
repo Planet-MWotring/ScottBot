@@ -1,0 +1,31 @@
+{
+  "moduleAliases": {
+    "br": {
+      "main": {
+        "registry": "main.bicep"
+      },
+      "modules": {
+        "registry": "modules/resources.bicep"
+      }
+    }
+  },
+  "analyzers": {
+    "core": {
+      "enabled": true,
+      "rules": {
+        "no-hardcoded-env-urls": {
+          "level": "warning"
+        },
+        "no-unused-params": {
+          "level": "warning"
+        },
+        "prefer-interpolation": {
+          "level": "warning"
+        }
+      }
+    }
+  },
+  "cloud": {
+    "currentProfile": "AzureCloud"
+  }
+}
